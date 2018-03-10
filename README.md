@@ -1,2 +1,2 @@
 # Ik-WC
-woocommerce customizations
+display woocommerce variation dropdown & product image update on shop page
