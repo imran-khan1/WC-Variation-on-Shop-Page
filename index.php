@@ -16,9 +16,7 @@ function ik_variation_shop_page() {
 	 
 	remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', 10 ); 
 	add_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_single_add_to_cart', 30 );
-
 }
-
 
  add_filter( 'woocommerce_before_shop_loop_item_title', 'woo_display_variation_dropdown_on_shop_page' );
  
@@ -36,11 +34,14 @@ global $product;
             ?>
         <div class="product-variation-images">
         <?php
+       
         foreach($product_variations as $product_variation) {
             // get the slug of the variation
-           $product_attribute_name = $product_variation['attributes']['attribute_pa_color'];
+           $product_attribute_name = strtolower($product_variation['attributes']['attribute_pa_color']);
+           $product_attribute_logo = strtolower($product_variation['attributes']['attribute_logo']);
+           if($product_attribute_logo != ""){ $product_attribute_logo = "-". $product_attribute_logo;}
             ?>
-            <div class="product-variation-image product-variation-<?php echo $product_attribute_name ?>" id="product-variation-<?php echo $product_variation['variation_id']; ?>" data-attribute="<?php echo $product_attribute_name ?>">
+            <div class="product-variation-image product-variation-<?php echo $product_attribute_name.$product_attribute_logo; ?>" id="product-variation-<?php echo $product_variation['variation_id']; ?>" data-attribute="<?php echo $product_attribute_name ?>">
             <img src="<?php echo $product_variation['image']['thumb_src'] ; ?>" alt="">
             </div><!-- #product-variation-image -->
         <?php } ?>
@@ -66,53 +67,55 @@ add_action('wp_head', 'ik_variation_css');
 function ik_variation_jquery() {
     ?>
     <script>
+       jQuery('select').on('change', function() {
 
-// watch out of change event on a specific select element by id
-    jQuery(document).on('change', 'select#pa_color', function() {
-        var value = "";
-        
-        
-        
-         // var selectedText = jQuery(this).find("option:selected").text();
-            var selectedValue = jQuery(this).val();
-           // alert("Selected Text: " + selectedText + " Value: " + selectedValue);
-           
-           
-          // if(selectedValue =="")
-        //{
-          jQuery('.attachment-woocommerce_thumbnail').css( 'display', 'block' ); 
-          alert(selectedValue); 
-       // }
-           
-               
-        // get the option that has been selected
-       value += ".product-variation-" + selectedValue;
-        
+         var value = "";
+         var logoValue = "";
+         var pa_color = "";
+         var pa_size = "";
      
-        // Hide all custom_variation divs
-        jQuery(this).parents("li").find('.product-variation-image').css( 'display', 'none' );
-        jQuery(this).parents("li").find('.attachment-woocommerce_thumbnail').css( 'display', 'none' );
-        
-             
+         if (jQuery(this).parents("li").find("#pa_color").length > 0){ var pa_colorValue = jQuery(this).parents("li").find("#pa_color").val().toLowerCase();  }              
+         if (jQuery(this).parents("li").find("#pa_size").length > 0){  var pa_sizeValue = jQuery(this).parents("li").find("#pa_size").val().toLowerCase();  }
+         if (jQuery(this).parents("li").find("#logo").length > 0){     var logoValue = jQuery(this).parents("li").find("#logo").val().toLowerCase();  }
        
-         var Id = jQuery(this).parents("li").find(value).attr('id');
-         
-         var img_id = "#"+Id;
+                            
+        // get the option that has been selected
+        if(logoValue !="") {value = ".product-variation-" + pa_colorValue+"-"+logoValue;}
+        else{ value = ".product-variation-" + pa_colorValue; }
+               
         
-        //alert(img_id);
-         
-        // Display only the variation image which matches the criteria
-        jQuery( img_id ).css( 'display', 'block' );
+            
+         if(pa_colorValue != ""){    
+             var Id = jQuery(this).parents("li").find(value).attr('id');
+            var img_id = "#"+Id;
+                 
         
-       // alert(value);
+             if(Id.length  > 0  );
+             {         
+             // Hide all custom_variation divs
+            jQuery(this).parents("li").find('.product-variation-image').css( 'display', 'none' );
+             jQuery(this).parents("li").find('.attachment-woocommerce_thumbnail').css( 'display', 'none' );
+             }
+        
+             jQuery( img_id ).css( 'display', 'block' );
+         
+        }
+        else
+        {
+            // Hide all custom_variation divs
+            jQuery(this).parents("li").find('.product-variation-image').css( 'display', 'none' );
+            jQuery(this).parents("li").find('.attachment-woocommerce_thumbnail').css( 'display', 'none' );
+            jQuery('.attachment-woocommerce_thumbnail').css( 'display', 'block' );
+        }
+                   
     });
     
-     jQuery(document).on('click', '.reset_variations', function() {
-      
+         
+       jQuery(document).on('click', '.reset_variations', function() {      
         jQuery(this).parents("li").find('.attachment-woocommerce_thumbnail').css( 'display', 'block' );
        
       });  
-        
+         
 </script>
     <?php
 }
